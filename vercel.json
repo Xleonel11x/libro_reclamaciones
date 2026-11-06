@@ -2,7 +2,6 @@
   "buildCommand": "composer install --no-dev --optimize-autoloader",
   "devCommand": "php -S localhost:3000 -t public",
   "installCommand": "composer install",
-  "framework": "php",
   "regions": ["gru1"],
   "functions": {
     "public/**/*.php": {
