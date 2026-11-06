@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../../config/bootstrap.php';
-require_admin(); check_csrf();
+Auth::requireAdmin();
+if (!Auth::checkCsrf()) json_out(['error' => 'Sesión inválida, recarga la página'], 419);
 $d = json_decode(file_get_contents('php://input'), true) ?? [];
 $s = fn($k) => trim((string)($d[$k] ?? ''));
 $bad = fn($m) => json_out(['error' => $m], 422);

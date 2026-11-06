@@ -48,6 +48,7 @@ En **Vercel Dashboard > Settings > Environment Variables**, agrega:
 | `SMTP_PASS` | `tu-app-password` | All |
 | `MAIL_FROM` | `tu-email@gmail.com` | All |
 | `MAIL_FROM_NAME` | `Libro de Reclamaciones` | All |
+| `JWT_SECRET` | `clave-aleatoria-64-chars` | All |
 
 > **Nota Gmail**: Usa una [App Password](https://support.google.com/accounts/answer/185833) en lugar de tu contraseña normal.
 
@@ -136,10 +137,11 @@ php scripts/create_admin.php admin@tudominio.com "Administrador" "ClaveSegura123
 ### ⚠️ Sesiones PHP
 Vercel usa **serverless functions stateless**. Las sesiones basadas en archivos (`session_start()`) **no persisten** entre invocaciones.
 
-**Soluciones**:
-1. **Supabase Auth** (recomendado): Migra auth a Supabase
-2. **Redis/Vercel KV**: Usa `@vercel/kv` para sesiones distribuidas
-3. **JWT en cookies**: Implementa auth stateless con JWT firmados
+**Solución implementada (JWT)**:
+Ya está implementado un sistema de autenticación con JWT que funciona bien en serverless. El token se almacena en una cookie y se verifica en cada petición.
+
+**Requisitos adicionales**:
+- `JWT_SECRET`: Clave secreta para firmar los tokens (generar con `php -r "echo bin2hex(random_bytes(32));"`)
 
 ### ⚠️ Archivos Temporales (PDF)
 Dompdf genera PDFs en memoria (`$p->output()`), **funciona bien** en serverless.
@@ -198,7 +200,7 @@ vercel logs                   # Ver logs
 
 - [ ] `composer.lock` commiteado
 - [ ] `database/schema.sql` ejecutado en Supabase
-- [ ] Variables de entorno en Vercel (10 variables)
+- [ ] Variables de entorno en Vercel (11 variables incluyendo JWT_SECRET)
 - [ ] SMTP probado (Gmail App Password)
 - [ ] Repositorio conectado a Vercel
 - [ ] Primer deploy exitoso
@@ -252,6 +254,9 @@ SMTP_PASS=abcd-efgh-ijkl-mnop  # App Password 16 chars
 # Email
 MAIL_FROM=tu-email@gmail.com
 MAIL_FROM_NAME="Libro de Reclamaciones"
+
+# JWT Secret (clave aleatoria de 64 caracteres)
+JWT_SECRET=clave-aleatoria-64-caracteres-generada-con-php-r
 ```
 
 ---

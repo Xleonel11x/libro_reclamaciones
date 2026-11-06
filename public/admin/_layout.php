@@ -2,7 +2,11 @@
 require_once __DIR__ . '/../../config/bootstrap.php';
 
 function admin_head(string $title, string $active): void {
-  require_admin(false);
+  $admin = Auth::isAdmin();
+  if (!$admin) {
+    header('Location: login.php');
+    exit;
+  }
   $nav = ['index.php' => ['📋', 'Reclamos'], 'sedes.php' => ['🏢', 'Sedes'], 'locales.php' => ['📍', 'Locales']]; ?>
 <!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="csrf" content="<?= csrf() ?>"><title><?= e($title) ?> · Libro de Reclamaciones</title>

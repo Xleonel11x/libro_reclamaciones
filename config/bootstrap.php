@@ -23,6 +23,11 @@ if (is_file($envPath)) {
 // Autoload src classes
 spl_autoload_register(fn($c) => is_file($f = __DIR__ . "/../src/$c.php") && require $f);
 
+// JWT Secret for Vercel serverless sessions
+if (!defined('JWT_SECRET')) {
+    define('JWT_SECRET', env('JWT_SECRET', 'cambiar-a-una-clave-secreta-muy-larga-en-produccion'));
+}
+
 // Timezone Perú
 date_default_timezone_set('America/Lima');
 

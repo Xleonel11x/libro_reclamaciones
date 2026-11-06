@@ -1,3 +1,5 @@
 <?php
 require_once __DIR__ . '/../../config/bootstrap.php';
-session_destroy(); header('Location: login.php');
+Auth::logoutAdmin();
+header('Location: login.php');
+exit;

@@ -7,10 +7,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   else {
     $u = Supabase::select('admins?select=*&email=eq.' . urlencode(strtolower(trim($_POST['email'] ?? ''))) . '&limit=1')[0] ?? null;
     if ($u && password_verify($_POST['password'] ?? '', $u['password_hash'])) {
-      session_regenerate_id(true);
-      $_SESSION['admin'] = ['id' => $u['id'], 'nombre' => $u['nombre']];
-      $_SESSION['fails'] = 0;
-      session_write_close();
+      // Login exitoso - usar JWT para Vercel serverless
+      Auth::loginAdmin($u['id'], $u['nombre']);
       header('Location: index.php');
       exit;
     }
