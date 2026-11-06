@@ -75,20 +75,45 @@ function json_out($d, int $c = 200): never {
     echo json_encode($d, JSON_UNESCAPED_UNICODE);
     exit;
 }
-function csrf(): string { return $_SESSION['csrf'] ??= bin2hex(random_bytes(16)); }
+// CSRF compatible con JWT (serverless) y sesión (local)
+function csrf(): string {
+    // Primero intentar obtener CSRF del token JWT (serverless Vercel)
+    // Usar JWT::getToken() para manejar casos donde $_COOKIE no está disponible
+    if (class_exists('JWT')) {
+        $token = JWT::getToken();
+        if ($token) {
+            $parts = explode('.', $token);
+            if (count($parts) === 3) {
+                $payloadDec = json_decode(base64_decode($parts[1]), true);
+                if ($payloadDec && isset($payloadDec['csrf'])) {
+                    return $payloadDec['csrf'];
+                }
+            }
+        }
+    }
+    // Fallback a sesión (desarrollo local)
+    return $_SESSION['csrf'] ??= bin2hex(random_bytes(16));
+}
+
 function check_csrf(): void {
-    if (!hash_equals(csrf(), $_SERVER['HTTP_X_CSRF'] ?? '')) {
+    $sentCsrf = $_SERVER['HTTP_X_CSRF'] ?? '';
+    $localCsrf = csrf();
+
+    if (!hash_equals($localCsrf, $sentCsrf)) {
         json_out(['error' => 'Sesión inválida, recarga la página'], 419);
     }
 }
+
 function require_admin(bool $json = true): void {
-    if (!empty($_SESSION['admin'])) return;
-    if ($json) {
-        json_out(['error' => 'No autorizado'], 401);
+    if (!Auth::isAdmin()) {
+        if ($json) {
+            json_out(['error' => 'No autorizado'], 401);
+        }
+        header('Location: login.php');
+        exit;
     }
-    header('Location: login.php');
-    exit;
 }
+
 function is_uuid($v): bool {
     return (bool)preg_match('/^[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$/i', (string)$v);
 }

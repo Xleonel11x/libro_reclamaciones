@@ -1,8 +1,50 @@
 $(function () {
-  const csrf = $('meta[name=csrf]').attr('content');
+  // Leer token desde localStorage (funciona en Vercel serverless)
+  let authToken = localStorage.getItem('auth_token');
+
+  // Si hay token JWT, extraer CSRF del payload
+  let csrf = null;
+  if (authToken) {
+    try {
+      const parts = authToken.split('.');
+      if (parts.length === 3) {
+        const payload = JSON.parse(atob(parts[1]));
+        csrf = payload.csrf;
+      }
+    } catch (e) {}
+  }
+
+  // Si no hay CSRF del JWT, usar del meta tag o localStorage
+  if (!csrf) {
+    csrf = $('meta[name=csrf]').attr('content') || localStorage.getItem('jwt_csrf');
+  }
+
+  // Sincronizar CSRF con meta tag (para actualizar dinámicamente)
+  if (csrf) {
+    $('meta[name=csrf]').attr('content', csrf);
+  }
+
+  // Función para obtener headers de autenticación
+  const getAuthHeaders = () => {
+    const h = { 'X-CSRF': csrf };
+    if (authToken) {
+      h['Authorization'] = 'Bearer ' + authToken;
+    }
+    return h;
+  };
+
   const api = (a, d = {}) => $.ajax({ url: '/admin/api.php', method: 'POST', contentType: 'application/json',
-    headers: { 'X-CSRF': csrf }, data: JSON.stringify({ a, ...d }) })
-    .fail(x => $('#msg').text(x.responseJSON?.error || 'Error inesperado'));
+    headers: getAuthHeaders(), data: JSON.stringify({ a, ...d }) })
+    .fail(x => {
+      // Si recibimos 401, el token expiró - limpiar y redirigir al login
+      if (x.status === 401) {
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('jwt_csrf');
+        window.location.href = 'login.php';
+        return;
+      }
+      $('#msg').text(x.responseJSON?.error || 'Error inesperado');
+    });
   const esc = s => $('<i>').text(s ?? '').html();
   const form = $f => Object.fromEntries(new FormData($f[0]));
   const fecha = d => d ? d.split('-').reverse().join('/') : '';

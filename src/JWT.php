@@ -49,20 +49,47 @@ class JWT {
     }
 
     /**
-     * Obtener token desde cookie o header Authorization
+     * Obtener token desde cookie, header o meta (para fallback en serverless)
      */
     public static function getToken(): ?string {
-        // Primero buscar en cookie
+        // 1. Primero buscar en cookie (PHP superglobal)
         if (isset($_COOKIE['auth_token'])) {
             return $_COOKIE['auth_token'];
         }
-        // Luego buscar en header Authorization (para AJAX)
+
+        // 2. Si $_COOKIE no está disponible, leer del header Cookie manualmente
+        // (problema conocido en vercel-php serverless)
+        if (isset($_SERVER['HTTP_COOKIE'])) {
+            $cookies = [];
+            foreach (explode(';', $_SERVER['HTTP_COOKIE']) as $cookie) {
+                $partes = explode('=', $cookie, 2);
+                if (count($partes) === 2) {
+                    $cookies[trim($partes[0])] = trim($partes[1]);
+                }
+            }
+            if (isset($cookies['auth_token'])) {
+                return $cookies['auth_token'];
+            }
+        }
+
+        // 3. Buscar en header Authorization (para AJAX con Bearer token)
         if (isset($_SERVER['HTTP_AUTHORIZATION'])) {
             $auth = $_SERVER['HTTP_AUTHORIZATION'];
             if (stripos($auth, 'Bearer ') === 0) {
                 return substr($auth, 7);
             }
         }
+        // También buscar en PHP_AUTH_TOKEN (auto-agregado por PHP)
+        if (isset($_SERVER['PHP_AUTH_TOKEN'])) {
+            return $_SERVER['PHP_AUTH_TOKEN'];
+        }
+
+        // 4. FALLBACK: Leer del query string (solo para debugging/environments with cookie issues)
+        // NOTA: Este es un workaround de última instancia para Vercel serverless
+        if (isset($_GET['auth_token'])) {
+            return $_GET['auth_token'];
+        }
+
         return null;
     }
 
@@ -84,31 +111,34 @@ class JWT {
      */
     public static function setAuthCookie(string $token, int $ttl = 86400): void {
         $secure = env('APP_URL') && stripos(env('APP_URL'), 'https://') === 0;
-        $domain = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : '';
 
-        setcookie('auth_token', $token, [
-            'expires' => $ttl,
+        // Para Vercel serverless, omitir domain para que el navegador lo asigne automáticamente
+        // Esto evita problemas con dominios dinámicos como myapp.vercel.app
+        $params = [
+            'expires' => time() + $ttl,
             'path' => '/',
-            'domain' => $domain,
             'secure' => $secure,
             'httponly' => true,
             'samesite' => 'Lax',
-        ]);
+        ];
+
+        // setcookie() con params array: el primer parámetro es el nombre, segundo el valor,
+        // y el tercer parámetro es el array de opciones (no acepta expires como 3er param)
+        setcookie('auth_token', $token, $params);
     }
 
     /**
      * Borrar cookie de autenticación
      */
     public static function clearAuthCookie(): void {
-        $domain = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : '';
-
-        setcookie('auth_token', '', [
+        $params = [
             'expires' => time() - 3600,
             'path' => '/',
-            'domain' => $domain,
             'secure' => true,
             'httponly' => true,
             'samesite' => 'Lax',
-        ]);
+        ];
+
+        setcookie('auth_token', '', $params);
     }
 }
