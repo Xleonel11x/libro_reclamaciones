@@ -1,6 +1,6 @@
 $(function () {
   const csrf = $('meta[name=csrf]').attr('content');
-  const api = (a, d = {}) => $.ajax({ url: 'api.php', method: 'POST', contentType: 'application/json',
+  const api = (a, d = {}) => $.ajax({ url: '/admin/api.php', method: 'POST', contentType: 'application/json',
     headers: { 'X-CSRF': csrf }, data: JSON.stringify({ a, ...d }) })
     .fail(x => $('#msg').text(x.responseJSON?.error || 'Error inesperado'));
   const esc = s => $('<i>').text(s ?? '').html();

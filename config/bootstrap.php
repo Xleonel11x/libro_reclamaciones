@@ -28,21 +28,43 @@ date_default_timezone_set('America/Lima');
 
 // Session configuration (Vercel: serverless, local: Apache)
 if (PHP_SAPI !== 'cli') {
-    // Vercel serverless: use /tmp for session files
-    if (getenv('VERCEL') === '1' || isset($_SERVER['VERCEL'])) {
+    // Verificar si estamos en Vercel (serverless)
+    $isVercel = getenv('VERCEL') === '1' || isset($_SERVER['VERCEL']) || isset($_SERVER['HTTP_X_FORWARDED_PROTO']);
+
+    // Determinar si la conexión es segura
+    $isSecure = $isVercel ||
+                 isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ||
+                 isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https';
+
+    // Configurar parámetros de cookie DE ANTES de session_start()
+    $host = $_SERVER['HTTP_HOST'] ?? null;
+    session_set_cookie_params([
+        'lifetime' => 1440,
+        'path' => '/',
+        'domain' => $host,
+        'secure' => $isSecure,
+        'httponly' => true,
+        'samesite' => 'Lax',
+    ]);
+
+    ini_set('session.cookie_httponly', '1');
+    ini_set('session.use_strict_mode', '1');
+
+    if ($isVercel) {
+        // Vercel serverless: use /tmp for session files
         ini_set('session.save_path', '/tmp');
         ini_set('session.gc_maxlifetime', '1440');
     }
-    ini_set('session.cookie_httponly', '1');
-    ini_set('session.cookie_secure', isset($_SERVER['HTTPS']) ? '1' : '0');
-    ini_set('session.cookie_samesite', 'Lax');
-    ini_set('session.use_strict_mode', '1');
+
     session_start();
 }
 
 function env(string $k, $d = null) { return $_ENV[$k] ?? $d; }
 function e($s): string { return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
 function json_out($d, int $c = 200): never {
+    if (session_status() === PHP_SESSION_ACTIVE) {
+        session_write_close();
+    }
     http_response_code($c);
     header('Content-Type: application/json; charset=utf-8');
     echo json_encode($d, JSON_UNESCAPED_UNICODE);
@@ -56,7 +78,9 @@ function check_csrf(): void {
 }
 function require_admin(bool $json = true): void {
     if (!empty($_SESSION['admin'])) return;
-    if ($json) json_out(['error' => 'No autorizado'], 401);
+    if ($json) {
+        json_out(['error' => 'No autorizado'], 401);
+    }
     header('Location: login.php');
     exit;
 }

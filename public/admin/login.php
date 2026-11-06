@@ -7,8 +7,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   else {
     $u = Supabase::select('admins?select=*&email=eq.' . urlencode(strtolower(trim($_POST['email'] ?? ''))) . '&limit=1')[0] ?? null;
     if ($u && password_verify($_POST['password'] ?? '', $u['password_hash'])) {
-      session_regenerate_id(true); $_SESSION['admin'] = ['id' => $u['id'], 'nombre' => $u['nombre']]; $_SESSION['fails'] = 0;
-      header('Location: index.php'); exit;
+      session_regenerate_id(true);
+      $_SESSION['admin'] = ['id' => $u['id'], 'nombre' => $u['nombre']];
+      $_SESSION['fails'] = 0;
+      session_write_close();
+      header('Location: index.php');
+      exit;
     }
     $_SESSION['fails'] = ($_SESSION['fails'] ?? 0) + 1; $_SESSION['fail_t'] = time();
     $err = 'Correo o contraseña incorrectos.';
