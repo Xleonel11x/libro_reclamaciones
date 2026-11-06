@@ -1,38 +1,31 @@
 {
-  "buildCommand": "composer install --no-dev --optimize-autoloader --no-interaction",
-  "devCommand": "php -S localhost:3000 -t public",
-  "installCommand": "composer install --no-dev --optimize-autoloader --no-interaction",
-  "regions": ["gru1"],
+  "version": 2,
   "functions": {
     "api/index.php": {
       "runtime": "vercel-php@0.7.4",
-      "maxDuration": 60
+      "memory": 1024,
+      "maxDuration": 60,
+      "excludeFiles": "{node_modules/**,vendor/**,.git/**,tests/**,README.md,composer.lock}"
     }
   },
   "routes": [
     {
       "src": "^/assets/([^.]+\\.(css|js|png|jpg|jpeg|gif|ico|svg|woff|woff2))$",
-      "headers": {
-        "Cache-Control": "public, max-age=31536000, immutable"
-      },
-      "dest": "/public/assets/$2"
+      "headers": { "Cache-Control": "public, max-age=31536000, immutable" },
+      "dest": "/public/assets/$1"
     },
     {
-      "src": "/api/(.*)",
-      "dest": "/api/index.php"
+      "src": "^/(css|js|images|fonts|favicon)/(.*)$",
+      "dest": "/public/$1/$2"
     },
     {
-      "src": "/admin/(.*)",
-      "dest": "/api/index.php"
+      "src": "^/(.*)\\.(ico|txt|webp|css|js|png|jpg|jpeg|gif|svg|woff|woff2)$",
+      "dest": "/public/$1.$2"
     },
-    {
-      "src": "/pdf/(.*)",
-      "dest": "/api/index.php"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/api/index.php"
-    }
+    { "src": "/api/(.*)", "dest": "/api/index.php" },
+    { "src": "/admin/(.*)", "dest": "/api/index.php" },
+    { "src": "/pdf/(.*)", "dest": "/api/index.php" },
+    { "src": "/(.*)", "dest": "/api/index.php" }
   ],
   "github": {
     "enabled": true,
