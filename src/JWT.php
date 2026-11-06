@@ -84,13 +84,31 @@ class JWT {
      */
     public static function setAuthCookie(string $token, int $ttl = 86400): void {
         $secure = env('APP_URL') && stripos(env('APP_URL'), 'https://') === 0;
-        setcookie('auth_token', $token, $ttl, '/', isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : null, $secure, true, 'Lax');
+        $domain = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : '';
+
+        setcookie('auth_token', $token, [
+            'expires' => $ttl,
+            'path' => '/',
+            'domain' => $domain,
+            'secure' => $secure,
+            'httponly' => true,
+            'samesite' => 'Lax',
+        ]);
     }
 
     /**
      * Borrar cookie de autenticación
      */
     public static function clearAuthCookie(): void {
-        setcookie('auth_token', '', time() - 3600, '/', isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : null, true, true, 'Lax');
+        $domain = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : '';
+
+        setcookie('auth_token', '', [
+            'expires' => time() - 3600,
+            'path' => '/',
+            'domain' => $domain,
+            'secure' => true,
+            'httponly' => true,
+            'samesite' => 'Lax',
+        ]);
     }
 }
