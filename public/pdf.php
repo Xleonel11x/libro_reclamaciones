@@ -1,5 +1,5 @@
 <?php // Descarga pública del PDF con token no adivinable (se entrega al consumidor al registrar)
-require __DIR__ . '/../config/bootstrap.php';
+require_once __DIR__ . '/../config/bootstrap.php';
 $t = $_GET['t'] ?? '';
 $r = is_uuid($t) ? Reclamo::find('token=eq.' . $t) : null;
 if (!$r) { http_response_code(404); exit('No encontrado'); }

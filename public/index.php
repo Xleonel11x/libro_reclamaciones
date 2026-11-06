@@ -1,4 +1,4 @@
-<?php require __DIR__ . '/../config/bootstrap.php'; ?>
+<?php require_once __DIR__ . '/../config/bootstrap.php'; ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>

@@ -1,5 +1,5 @@
 <?php
-require __DIR__ . '/../../config/bootstrap.php';
+require_once __DIR__ . '/../../config/bootstrap.php';
 $err = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   if (!hash_equals(csrf(), $_POST['csrf'] ?? '')) $err = 'Sesión inválida, recarga la página.';

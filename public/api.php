@@ -1,5 +1,5 @@
 <?php
-require __DIR__ . '/../config/bootstrap.php';
+require_once __DIR__ . '/../config/bootstrap.php';
 $act = $_GET['action'] ?? '';
 $in  = json_decode(file_get_contents('php://input'), true) ?? [];
 $ok   = fn($d = []) => json_out(['success' => true, 'data' => $d]);

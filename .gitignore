@@ -34,3 +34,5 @@ database/*.sql
 
 # Scripts output
 scripts/*.log
+.vercel
+.env*

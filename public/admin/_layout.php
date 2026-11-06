@@ -1,5 +1,5 @@
 <?php
-require __DIR__ . '/../../config/bootstrap.php';
+require_once __DIR__ . '/../../config/bootstrap.php';
 
 function admin_head(string $title, string $active): void {
   require_admin(false);
