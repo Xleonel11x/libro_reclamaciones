@@ -5,11 +5,12 @@
 ### Configuración Principal
 | Archivo | Propósito |
 |---------|-----------|
-| `vercel.json` | Configuración principal: build, routes, functions (`now-php@1.0.0`) |
+| `vercel.json` | Configuración principal: build, routes, functions (`vercel-php@0.7.4`) |
 | `.vercelignore` | Archivos excluidos del deploy (vendor, .env, scripts, etc.) |
 | `php.ini` | Configuración PHP optimizada para serverless (memoria, OPcache, sesiones) |
 | `.env.production.example` | Plantilla de variables de entorno para producción |
 | `composer.json` | Define PHP version (`"php": "^8.2"`) — Vercel la usa para runtime |
+| `api/index.php` | **Entry point único** para vercel-php — enruta a public/ |
 
 ### CI/CD
 | Archivo | Propósito |
@@ -80,8 +81,10 @@ libro-reclamaciones/
 │   ├── Reclamo.php
 │   ├── PdfService.php
 │   └── Mailer.php
-└── public/                         # DocumentRoot
-    ├── .htaccess                   # Routing (nuevo)
+├── api/                            # Vercel PHP entry point (vercel-php)
+│   └── index.php                  # Router único → enruta a public/
+└── public/                         # DocumentRoot (app real)
+    ├── .htaccess                   # Routing local (no usado en Vercel)
     ├── index.php                   # Formulario público
     ├── api.php                     # API pública
     ├── pdf.php                     # PDF público

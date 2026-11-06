@@ -4,11 +4,7 @@
   "installCommand": "composer install",
   "regions": ["gru1"],
   "functions": {
-    "public/**/*.php": {
-      "runtime": "vercel-php@0.7.4",
-      "maxDuration": 30
-    },
-    "public/admin/**/*.php": {
+    "api/index.php": {
       "runtime": "vercel-php@0.7.4",
       "maxDuration": 30
     }
@@ -22,20 +18,8 @@
       "dest": "/public/assets/$1"
     },
     {
-      "src": "/admin/(.*)",
-      "dest": "/public/admin/$1"
-    },
-    {
-      "src": "/api/(.*)",
-      "dest": "/public/api.php?action=$1"
-    },
-    {
-      "src": "/pdf/(.*)",
-      "dest": "/public/pdf.php?t=$1"
-    },
-    {
       "src": "/(.*)",
-      "dest": "/public/index.php"
+      "dest": "/api/index.php"
     }
   ],
   "github": {

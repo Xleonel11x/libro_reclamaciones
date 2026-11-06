@@ -99,8 +99,10 @@ php scripts/create_admin.php admin@tudominio.com "Administrador" "ClaveSegura123
 ├── .env.production.example  # Plantilla de variables de producción
 ├── composer.json            # Dependencias PHP
 ├── composer.lock            # Lock file (commitear)
-├── public/                  # DocumentRoot
-│   ├── .htaccess           # Routing para Vercel
+├── api/                     # Vercel PHP entry point (requerido por vercel-php)
+│   └── index.php           # Router único → enruta a public/
+├── public/                  # DocumentRoot (app real)
+│   ├── .htaccess           # Routing local (no usado en Vercel)
 │   ├── index.php           # Formulario público
 │   ├── api.php             # API pública
 │   ├── pdf.php             # Descarga PDF
