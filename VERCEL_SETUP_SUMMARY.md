@@ -5,10 +5,11 @@
 ### Configuración Principal
 | Archivo | Propósito |
 |---------|-----------|
-| `vercel.json` | Configuración principal: build, routes, functions, env vars |
+| `vercel.json` | Configuración principal: build, routes, functions (`now-php@1.0.0`) |
 | `.vercelignore` | Archivos excluidos del deploy (vendor, .env, scripts, etc.) |
 | `php.ini` | Configuración PHP optimizada para serverless (memoria, OPcache, sesiones) |
 | `.env.production.example` | Plantilla de variables de entorno para producción |
+| `composer.json` | Define PHP version (`"php": "^8.2"`) — Vercel la usa para runtime |
 
 ### CI/CD
 | Archivo | Propósito |

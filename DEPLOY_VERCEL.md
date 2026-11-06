@@ -142,6 +142,12 @@ Vercel usa **serverless functions stateless**. Las sesiones basadas en archivos 
 ### ⚠️ Archivos Temporales (PDF)
 Dompdf genera PDFs en memoria (`$p->output()`), **funciona bien** en serverless.
 
+### ⚠️ Runtime PHP en Vercel
+Vercel usa el runtime legacy `now-php@1.0.0`. La versión de PHP se define en `composer.json`:
+```json
+{ "require": { "php": "^8.2" } }
+```
+
 ### ⚠️ Timeout
 - **Vercel Hobby**: 10s max
 - **Vercel Pro**: 60s max
