@@ -1,13 +1,23 @@
 <?php
+/**
+ * Bootstrap - Works both for local development (Apache/Nginx) and Vercel serverless
+ */
 declare(strict_types=1);
-require __DIR__ . '/../vendor/autoload.php';
 
-// Load .env file (works both locally and in Vercel)
+// Prevent double loading
+if (defined('BOOTSTRAP_LOADED')) exit;
+define('BOOTSTRAP_LOADED', true);
+
+// Load composer autoload (may already be loaded by api/index.php in Vercel)
+$autoloadPath = dirname(__DIR__) . '/vendor/autoload.php';
+if (is_file($autoloadPath) && !class_exists(\Composer\Autoload\ClassLoader::class)) {
+    require_once $autoloadPath;
+}
+
+// Load environment variables
 $envPath = __DIR__ . '/../.env';
 if (is_file($envPath)) {
-    foreach (parse_ini_file($envPath) ?: [] as $k => $v) {
-        $_ENV[$k] = $v;
-    }
+    foreach (parse_ini_file($envPath) ?: [] as $k => $v) $_ENV[$k] = $v;
 }
 
 // Autoload src classes
@@ -16,12 +26,13 @@ spl_autoload_register(fn($c) => is_file($f = __DIR__ . "/../src/$c.php") && requ
 // Timezone Perú
 date_default_timezone_set('America/Lima');
 
-// Session configuration for serverless (Vercel)
-// Note: File-based sessions don't persist in serverless.
-// For production, use Supabase Auth or Vercel KV (Redis).
+// Session configuration (Vercel: serverless, local: Apache)
 if (PHP_SAPI !== 'cli') {
-    ini_set('session.save_path', '/tmp');
-    ini_set('session.gc_maxlifetime', '1440');
+    // Vercel serverless: use /tmp for session files
+    if (getenv('VERCEL') === '1' || isset($_SERVER['VERCEL'])) {
+        ini_set('session.save_path', '/tmp');
+        ini_set('session.gc_maxlifetime', '1440');
+    }
     ini_set('session.cookie_httponly', '1');
     ini_set('session.cookie_secure', isset($_SERVER['HTTPS']) ? '1' : '0');
     ini_set('session.cookie_samesite', 'Lax');
