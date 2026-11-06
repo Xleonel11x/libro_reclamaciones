@@ -3,10 +3,10 @@
  * JWT Helper para autenticación stateless en Vercel serverless
  */
 class JWT {
-    private static string $secret;
+    private static ?string $secret = null;
 
     private static function getSecret(): string {
-        if (!self::$secret) {
+        if (self::$secret === null) {
             self::$secret = env('JWT_SECRET') ?: 'cambiar-a-una-clave-secreta-muy-larga-en-produccion';
         }
         return self::$secret;
@@ -98,11 +98,12 @@ class JWT {
      * Borrar cookie de autenticación
      */
     public static function clearAuthCookie(): void {
+        $secure = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on';
         setcookie('auth_token', '', [
             'lifetime' => -1,
             'path' => '/',
             'domain' => isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : null,
-            'secure' => true,
+            'secure' => $secure,
             'httponly' => true,
             'samesite' => 'Lax',
         ]);
