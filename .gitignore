@@ -1,0 +1,36 @@
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Dependencies
+vendor/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Vercel
+.vercel
+.vercelignore
+
+# Testing
+.phpunit.result.cache
+coverage/
+
+# Database
+*.sql
+database/*.sql
+
+# Scripts output
+scripts/*.log

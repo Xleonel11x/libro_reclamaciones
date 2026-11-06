@@ -1,0 +1,4 @@
+# Si el DocumentRoot es la raíz del proyecto, redirige todo a /public
+RewriteEngine On
+RewriteRule ^$ public/ [L]
+RewriteRule ^(?!public/)(.*)$ public/$1 [L]

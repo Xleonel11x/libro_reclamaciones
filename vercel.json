@@ -1,0 +1,60 @@
+{
+  "buildCommand": "composer install --no-dev --optimize-autoloader",
+  "devCommand": "php -S localhost:3000 -t public",
+  "installCommand": "composer install",
+  "framework": "php",
+  "regions": ["gru1"],
+  "functions": {
+    "public/**/*.php": {
+      "runtime": "php@8.2",
+      "maxDuration": 30
+    },
+    "public/admin/**/*.php": {
+      "runtime": "php@8.2",
+      "maxDuration": 30
+    }
+  },
+  "routes": [
+    {
+      "src": "/assets/(.*)",
+      "headers": {
+        "Cache-Control": "public, max-age=31536000, immutable"
+      },
+      "dest": "/public/assets/$1"
+    },
+    {
+      "src": "/admin/(.*)",
+      "dest": "/public/admin/$1"
+    },
+    {
+      "src": "/api/(.*)",
+      "dest": "/public/api.php?action=$1"
+    },
+    {
+      "src": "/pdf/(.*)",
+      "dest": "/public/pdf.php?t=$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/public/index.php"
+    }
+  ],
+  "env": {
+    "APP_URL": "@app_url",
+    "SUPABASE_URL": "@supabase_url",
+    "SUPABASE_SERVICE_KEY": "@supabase_service_key",
+    "SUPABASE_ANON_KEY": "@supabase_anon_key",
+    "SMTP_HOST": "@smtp_host",
+    "SMTP_PORT": "@smtp_port",
+    "SMTP_SECURE": "@smtp_secure",
+    "SMTP_USER": "@smtp_user",
+    "SMTP_PASS": "@smtp_pass",
+    "MAIL_FROM": "@mail_from",
+    "MAIL_FROM_NAME": "@mail_from_name"
+  },
+  "github": {
+    "enabled": true,
+    "autoAlias": true,
+    "silent": false
+  }
+}
